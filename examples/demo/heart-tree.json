@@ -467,8 +467,8 @@
       "name": "Ventes",
       "description": "Domaine « Ventes ».",
       "icon": "chart",
-      "x": -111.5,
-      "y": 285.8,
+      "x": -185.9,
+      "y": 219.9,
       "theme": {
         "color": "#ffb547",
         "glow": "#ffb547"
@@ -655,8 +655,8 @@
       "name": "Opérations",
       "description": "Domaine « Opérations ».",
       "icon": "layers",
-      "x": -401.1,
-      "y": -17.7,
+      "x": -390.1,
+      "y": 5.1,
       "theme": {
         "color": "#5ad1a5",
         "glow": "#5ad1a5"
@@ -822,8 +822,8 @@
       "name": "Intelligence",
       "description": "Domaine « Intelligence ».",
       "icon": "database",
-      "x": -272.8,
-      "y": -301.9,
+      "x": -342.1,
+      "y": -263.6,
       "theme": {
         "color": "#7aa7ff",
         "glow": "#7aa7ff"
@@ -964,8 +964,8 @@
       "name": "Clients",
       "description": "Domaine « Clients ».",
       "icon": "users",
-      "x": -16.8,
-      "y": -189.3,
+      "x": -69,
+      "y": -259.7,
       "theme": {
         "color": "#ff5c8a",
         "glow": "#ff5c8a"
@@ -1087,8 +1087,8 @@
       "name": "Finances",
       "description": "Domaine « Finances ».",
       "icon": "gem",
-      "x": 16.8,
-      "y": -189.3,
+      "x": 69,
+      "y": -259.7,
       "theme": {
         "color": "#f2d45c",
         "glow": "#f2d45c"
@@ -1219,8 +1219,8 @@
       "name": "Équipe",
       "description": "Domaine « Équipe ».",
       "icon": "flag",
-      "x": 272.8,
-      "y": -301.9,
+      "x": 342.1,
+      "y": -263.6,
       "theme": {
         "color": "#b18cff",
         "glow": "#b18cff"
@@ -1392,8 +1392,8 @@
       "name": "Produit",
       "description": "Domaine « Produit ».",
       "icon": "bolt",
-      "x": 401.1,
-      "y": -17.7,
+      "x": 390.1,
+      "y": 5.1,
       "theme": {
         "color": "#4fd6e8",
         "glow": "#4fd6e8"
@@ -1547,8 +1547,8 @@
       "name": "Santé",
       "description": "Domaine « Santé ».",
       "icon": "leaf",
-      "x": 111.5,
-      "y": 285.8,
+      "x": 185.9,
+      "y": 219.9,
       "theme": {
         "color": "#7ee07a",
         "glow": "#7ee07a"

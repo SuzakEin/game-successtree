@@ -197,34 +197,62 @@
   }
 
   /* ------------------------------------------------------------------ layouts (identiques au PHP) */
+  function clean4(v) { v = Math.round(v * 10000) / 10000; return v === 0 ? 0 : v; }
+  function heartPoint(t, R) {
+    var x = 16 * Math.pow(Math.sin(t), 3);
+    var y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    return { x: clean4(x / 16 * R), y: clean4(y / 16 * R) };
+  }
   var layouts = {
-    /** 9 positions sur la courbe du cœur, t = π + 2πk/9 (k = 0..8), normalisées par 16 et mises à l'échelle R. */
+    /**
+     * Preset cœur (SPEC §8, identique à PHP Layout::heart) : 9 hubs à longueur d'arc égale sur la courbe
+     * normalisée (1440 pas de t = π à 3π, cible L·k/9), k = 0 dans la pointe basse puis gauche en montant,
+     * droite en redescendant. Renvoie un tableau de 9 points {x,y}, avec aussi .points (idem) et .center {0,0}
+     * pour la parité avec le PHP (['points' => …, 'center' => …]).
+     */
     heart: function (R) {
       R = num(R) || 420;
-      var pts = [];
-      for (var k = 0; k < 9; k++) {
-        var t = Math.PI + TAU * k / 9;
-        var x = 16 * Math.pow(Math.sin(t), 3);
-        var y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-        pts.push({ x: round1(x / 16 * R), y: round1(y / 16 * R) });
+      var steps = 1440, lengths = [0], prev = heartPoint(Math.PI, 1);
+      for (var i = 1; i <= steps; i++) {
+        var cur = heartPoint(Math.PI + TAU * i / steps, 1);
+        lengths[i] = lengths[i - 1] + Math.hypot(cur.x - prev.x, cur.y - prev.y);
+        prev = cur;
       }
+      var total = lengths[steps], pts = [], j = 0;
+      for (var k = 0; k < 9; k++) {
+        var target = total * k / 9;
+        while (j < steps && lengths[j + 1] < target) j++;
+        var seg = lengths[j + 1] - lengths[j];
+        var frac = seg > 0 ? (target - lengths[j]) / seg : 0;
+        pts.push(heartPoint(Math.PI + TAU * (j + frac) / steps, R));
+      }
+      pts.points = pts.slice();
+      pts.center = { x: 0, y: 0 };
       return pts;
     },
-    /** n positions régulières sur un cercle de rayon R, en partant du haut (−90°), sens horaire. */
-    radial: function (n, R) {
-      n = Math.max(1, Math.floor(num(n) || 9)); R = num(R) || 420;
+    /** n points réguliers sur un cercle de rayon R (défaut 300), à partir de start (radians, défaut −π/2 = haut). */
+    radial: function (n, R, start) {
+      n = Math.max(0, Math.floor(num(n) || 0)); R = num(R); if (R == null) R = 300;
+      start = num(start); if (start == null) start = -Math.PI / 2;
       var pts = [];
-      for (var i = 0; i < n; i++) { var a = -Math.PI / 2 + TAU * i / n; pts.push({ x: round1(Math.cos(a) * R), y: round1(Math.sin(a) * R) }); }
+      for (var i = 0; i < n; i++) { var a = start + TAU * i / Math.max(1, n); pts.push({ x: clean4(Math.cos(a) * R), y: clean4(Math.sin(a) * R) }); }
       return pts;
     },
-    /** n positions sur un anneau de rayon R, décalées d'une demi-case (aucun point pile en haut). */
-    ring: function (n, R) {
-      n = Math.max(1, Math.floor(num(n) || 9)); R = num(R) || 420;
-      var pts = [];
-      for (var i = 0; i < n; i++) { var a = -Math.PI / 2 + TAU * (i + 0.5) / n; pts.push({ x: round1(Math.cos(a) * R), y: round1(Math.sin(a) * R) }); }
-      return pts;
+    /** Anneaux concentriques : counts[i] points sur l'anneau i (rayon (i+1)·spacing, défaut 160), anneaux impairs décalés d'un demi-pas. */
+    ring: function (counts, spacing) {
+      if (!Array.isArray(counts)) counts = [num(counts) || 0];
+      spacing = num(spacing) || 160;
+      var out = [];
+      counts.forEach(function (n, i) {
+        n = Math.floor(num(n) || 0); if (n <= 0) return;
+        var off = (i % 2) * (Math.PI / n);
+        layouts.radial(n, (i + 1) * spacing, -Math.PI / 2 + off).forEach(function (p) { p.ring = i; out.push(p); });
+      });
+      return out;
     }
   };
+  /** Répartit n éléments sur des anneaux de capacité 6, 12, 18… (utilisé par layout 'ring'). */
+  function ringCounts(n) { var c = [], cap = 6; while (n > 0) { var k = Math.min(cap, n); c.push(k); n -= k; cap += 6; } return c; }
 
   /* ------------------------------------------------------------------ données & statuts (§4, §5) */
   function normalizeData(d) {
@@ -308,35 +336,57 @@
       while (cur && guard++ < 10000) { if (by[cur].kind === 'hub') { hubOf[n.uid] = cur; break; } cur = eff[cur]; }
       if (!hubOf[n.uid]) hubOf[n.uid] = null;
     });
-    return { by: by, order: order, origin: origin, eff: eff, kids: kids, hubOf: hubOf };
+    // parité PHP : enfants « bruts » (parent_uid) et sources des liens 'path' entrants
+    var rawKids = {}, pathIn = {};
+    data.nodes.forEach(function (n) { if (n.parent && by[n.parent]) (rawKids[n.parent] || (rawKids[n.parent] = [])).push(n.uid); });
+    (data.links || []).forEach(function (l) {
+      if (l.type === 'path' && by[l.from] && by[l.to]) (pathIn[l.to] || (pathIn[l.to] = [])).push(l.from);
+    });
+    return { by: by, order: order, origin: origin, eff: eff, kids: kids, hubOf: hubOf, rawKids: rawKids, pathIn: pathIn };
+  }
+
+  /** Prérequis implicites (condition 'parent') : parent_uid + sources des liens 'path' entrants ; sinon l'origine. */
+  function prerequisites(idx, u) {
+    var n = idx.by[u]; if (!n || n.kind === 'origin') return [];
+    var pre = [];
+    if (n.parent && idx.by[n.parent]) pre.push(n.parent);
+    (idx.pathIn[u] || []).forEach(function (f) { if (pre.indexOf(f) < 0) pre.push(f); });
+    if (!pre.length && idx.origin && idx.origin.uid !== u) pre.push(idx.origin.uid);
+    return pre;
   }
 
   function isDone(n) { return !!n && (n.status === 'completed' || !!(n.progress && n.progress.completed_at)); }
 
-  /** Évalue une condition. mode: 'unlock' | 'complete' (validation explicite) | 'auto'. Renvoie true/false/null (inconnu). */
+  /**
+   * Évalue une condition (identique à PHP ProgressEngine::evalCondition).
+   * mode: 'unlock' | 'auto' | 'complete' (validation explicite : 'manual' devient vrai).
+   * Renvoie true/false, ou null pour un 'callback' en ligne (évalué côté serveur uniquement).
+   */
   function evalCondition(c, n, ctx, mode) {
-    var p = c.params || {}, done = ctx.done, idx = ctx.idx;
+    var p = isObj(c.params) ? c.params : {}, done = ctx.done, idx = ctx.idx, list, cnt, min;
     switch (c.type) {
-      case 'parent': { var par = idx.eff[n.uid]; return par ? !!done[par] : true; }
-      case 'node': return !!done[p.node];
-      case 'all': { var a = Array.isArray(p.nodes) ? p.nodes : []; return a.every(function (u) { return !!done[u]; }); }
-      case 'any': {
-        var b = Array.isArray(p.nodes) ? p.nodes : [];
-        var min = num(p.min); if (min == null) min = 1;
-        return b.filter(function (u) { return !!done[u]; }).length >= min;
-      }
-      case 'children': {
-        var k = idx.kids[n.uid] || [];
-        var cnt = k.filter(function (u) { return !!done[u]; }).length;
-        var m = num(p.min);
-        return m == null ? cnt === k.length : cnt >= m;
-      }
+      case 'parent': return prerequisites(idx, n.uid).every(function (u) { return !!done[u]; });
+      case 'node': return typeof p.node === 'string' && !!done[p.node];
+      case 'all':
+        if (!Array.isArray(p.nodes) || !p.nodes.length) return false;
+        return p.nodes.every(function (u) { return typeof u === 'string' && !!done[u]; });
+      case 'any':
+        if (!Array.isArray(p.nodes) || !p.nodes.length) return false;
+        min = num(p.min) == null ? 1 : Math.max(1, Math.trunc(num(p.min)));
+        return p.nodes.filter(function (u) { return typeof u === 'string' && !!done[u]; }).length >= min;
+      case 'children':
+        list = idx.rawKids[n.uid] || [];
+        if (!list.length) return false;
+        cnt = list.filter(function (u) { return !!done[u]; }).length;
+        return num(p.min) == null ? cnt === list.length : cnt >= Math.max(1, Math.trunc(num(p.min)));
       case 'metric': {
+        if (typeof p.metric !== 'string') return false;
         var v = num(ctx.metrics[p.metric]); if (v == null) v = 0;
         var target = num(p.value); if (target == null) target = 0;
-        switch (p.op || '>=') {
-          case '>': return v > target; case '>=': return v >= target; case '<': return v < target;
-          case '<=': return v <= target; case '==': return v === target; case '!=': return v !== target;
+        var eps = 1e-9;
+        switch (p.op == null ? '>=' : String(p.op)) {
+          case '>': return v > target; case '>=': return v >= target - eps; case '<': return v < target;
+          case '<=': return v <= target + eps; case '==': return Math.abs(v - target) < eps; case '!=': return Math.abs(v - target) >= eps;
         }
         return false;
       }
@@ -706,7 +756,8 @@
       } else {
         var ringHubs = topHubs.filter(function (n) { return n.uid !== centralUid || !!pos[n.uid]; });
         if (centralUid && !pos[centralUid]) pos[centralUid] = { x: O.x, y: O.y };
-        var pts = layoutName === 'ring' ? layouts.ring(ringHubs.length, R) : layouts.radial(ringHubs.length, R);
+        var rc = ringCounts(ringHubs.length);
+        var pts = layoutName === 'ring' ? layouts.ring(rc, R / rc.length) : layouts.radial(ringHubs.length, R);
         ringHubs.forEach(function (n, i) { pos[n.uid] = { x: O.x + pts[i].x, y: O.y + pts[i].y }; });
       }
     }
@@ -1588,7 +1639,7 @@
     function nm(u) { var x = idx.by[u]; return x ? (x.name || u) : String(u); }
     function nms(a) { return (Array.isArray(a) ? a : []).map(nm).join(', '); }
     switch (c.type) {
-      case 'parent': { var par = idx.eff[n.uid]; return par ? fmt(t.cond_parent, { name: nm(par) }) : t.cond_parent_none; }
+      case 'parent': { var pre = prerequisites(idx, n.uid); return pre.length ? fmt(t.cond_parent, { name: nms(pre) }) : t.cond_parent_none; }
       case 'node': return fmt(t.cond_node, { name: nm(p.node) });
       case 'all': return fmt(t.cond_all, { names: nms(p.nodes) });
       case 'any': return fmt(t.cond_any, { min: num(p.min) || 1, names: nms(p.nodes) });
@@ -1638,7 +1689,7 @@
     this.data.nodes.forEach(function (x) { if (x.status === 'completed') ctx.done[x.uid] = true; });
     ['unlock', 'complete'].forEach(function (ph) {
       var list = n.conditions.filter(function (c) { return (c.phase || 'unlock') === ph; });
-      if (ph === 'unlock' && !list.length && n.kind !== 'origin' && self.idx.eff[n.uid]) list = [{ type: 'parent', params: {}, phase: 'unlock' }];
+      if (ph === 'unlock' && !list.length && prerequisites(self.idx, n.uid).length) list = [{ type: 'parent', params: {}, phase: 'unlock' }];
       if (!list.length) return;
       var sec = h('section', 'st-sec', body);
       h('h3', null, sec, t['conditions_' + ph]);
@@ -1936,7 +1987,8 @@
     var others = hubs.filter(function (n) { return n !== central; }).sort(function (a, b) { return (a.sort - b.sort) || (idx.order[a.uid] - idx.order[b.uid]); });
     if (!central && others.length >= 10 && name === 'heart') { central = others.splice(9, 1)[0]; }
     this._pushUndo();
-    var pts = name === 'heart' ? layouts.heart(R) : (name === 'ring' ? layouts.ring(others.length, R) : layouts.radial(others.length, R));
+    var rc2 = ringCounts(others.length);
+    var pts = name === 'heart' ? layouts.heart(R) : (name === 'ring' ? layouts.ring(rc2, R / Math.max(1, rc2.length)) : layouts.radial(others.length, R));
     function move(n, x, y) {
       var bx = self.base[n.uid].x, by = self.base[n.uid].y, dx = x - bx, dy = y - by;
       self._descendants(n.uid).forEach(function (d) { var dn = idx.by[d]; if (dn.x != null && dn.y != null && dn.kind !== 'hub') { dn.x = round1(dn.x + dx); dn.y = round1(dn.y + dy); } });

@@ -411,7 +411,9 @@ Trois niveaux, du plus global au plus précis :
    }
    ```
 
-   La liste exhaustive des variables est documentée en tête de `assets/successtree.css`.
+   Variables disponibles : `--st-bg`, `--st-bg2`, `--st-accent`, `--st-line`, `--st-hub`, `--st-hub-ink`,
+   `--st-locked`, `--st-text`, `--st-muted`, `--st-panel`, `--st-panel-border`, `--st-font`, `--st-font-title`,
+   `--st-radius` (voir `assets/successtree.css`).
 
 2. **`tree.theme`** (par arbre, enregistré en base) : `background`, `accent`, `line`, `font`.
 3. **`node.theme`** (par nœud) : `color`, `glow`, `shape`, `size`, `label`.
@@ -423,7 +425,7 @@ Trois niveaux, du plus global au plus précis :
 | `expandPush` | `1.6` | facteur de poussée des hubs quand le hub central se déploie |
 | `hubRadius` | `34` | rayon des hubs (unités monde) |
 | `nodeRadius` | `9` | rayon des points de branche |
-| `showLabels` | `"hover"` | affichage des libellés (ex. `"hover"`, `"always"`, `"never"` — voir `successtree.js`) |
+| `showLabels` | `"hover"` | affichage des libellés : `"hover"`, `"always"` ou `"never"` |
 
 **Icônes intégrées** (`node.icon`) : `target, heart, star, list, users, filter, database, globe, chart, building,
 check, layers, bolt, book, flag, crown, gem, shield, leaf, flame, lock` ; sinon un texte court ou un emoji.

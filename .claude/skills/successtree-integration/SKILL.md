@@ -141,8 +141,8 @@ Produis un payload conforme à SPEC §4 (`tree`, `nodes`, `links`, optionnelleme
 - Ne mets pas de `status` : il est calculé.
 
 **Positions** (unités monde, origine (0,0), **y vers le bas**, R ≈ 420)
-- `heart` : hub k (k = 0..8) à t = π + 2πk/9, `x = 16 sin³t`, `y = −(13 cos t − 5 cos 2t − 2 cos 3t − cos 4t)`,
-  divisés par 16 (comme `Layout::heart()`) puis × R, arrondis à 0,1 (k = 0 : pointe basse ; puis paires gauche/droite). Calcule-les avec un
+- `heart` : 9 hubs répartis à longueur d'arc égale en partant de la pointe basse (t = π), sur `x = 16 sin³t`, `y = −(13 cos t − 5 cos 2t − 2 cos 3t − cos 4t)`,
+  divisés par 16 (comme `Layout::heart()`) puis × R, arrondis à 0,1 (k = 0 : pointe basse ; puis paires gauche/droite). Calcule-les avec `php -r` + `SuccessTree\Service\Layout::heart(420)` ou un
   script (`node -e` / `php -r`) plutôt qu'à la main, ou laisse `x`/`y` à `null` et `tree.layout: "heart"` pour que
   le preset JS/PHP les place.
 - `radial` : hubs à `(R cos θ, R sin θ)`, θ = −π/2 + 2πk/n (le premier en haut).
