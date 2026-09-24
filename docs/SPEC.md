@@ -216,8 +216,9 @@ Rendu : SVG (liens, nœuds, halos), fond étoilé, pan (drag) + zoom (molette/pi
 ## 8. Preset « cœur » (9 hubs + 1 central)
 
 Courbe paramétrique du cœur `x = 16 sin³t`, `y = -(13 cos t − 5 cos 2t − 2 cos 3t − cos 4t)`, normalisée
-et mise à l'échelle `R` (défaut 420 unités). 9 hubs à t = π + 2πk/9 (k = 0..8) : un hub dans la pointe basse (t = π) puis 4 paires
-symétriques gauche/droite (les lobes hauts encadrent le creux, qui reste vide). Le 10ᵉ hub
+et mise à l'échelle `R` (défaut 420 unités). 9 hubs répartis à **longueur d'arc égale** (échantillonnage 1440 pas de t = π à 3π, cible L·k/9) :
+un hub dans la pointe basse (t = π) puis 4 paires symétriques ; le creux (t = 2π) reste vide.
+Pour R = 420 : (0,446.25) (∓185.88,219.85) (∓390.08,5.15) (∓342.08,−263.59) (∓69.04,−259.67). Le 10ᵉ hub
 (central) posé en (0,0) sur l'origin (légèrement décalé si besoin pour être cliquable : hub central
 au-dessus de l'origin, l'origin est son point d'ancrage). Implémenté à l'identique en PHP (`Layout::heart`)
 et JS (`SuccessTree.layouts.heart`).
