@@ -1,0 +1,1785 @@
+{
+  "tree": {
+    "uid": "t_heart",
+    "slug": "coeur",
+    "name": "Cœur de l’entreprise",
+    "description": "Neuf domaines de développement autour d’une vision centrale. Démo SuccessTree.",
+    "layout": "heart",
+    "theme": {
+      "background": "#2e2f6b",
+      "accent": "#c8b6ff",
+      "line": "rgba(255,255,255,.55)",
+      "font": "system-ui, sans-serif"
+    },
+    "settings": {
+      "expandPush": 1.6,
+      "hubRadius": 34,
+      "nodeRadius": 9,
+      "showLabels": "hover"
+    }
+  },
+  "nodes": [
+    {
+      "uid": "ent_n_origin",
+      "parent": null,
+      "kind": "origin",
+      "slug": "depart",
+      "name": "Départ",
+      "description": "Point de départ : valide-le pour ouvrir les neuf domaines du cœur.",
+      "icon": "target",
+      "x": 0,
+      "y": 0,
+      "theme": {
+        "color": "#ffffff",
+        "glow": "#c8b6ff"
+      },
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_h_vision",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "vision",
+      "name": "Vision",
+      "description": "Hub central posé sur le départ. Déployé, il s'ouvre en cercle et repousse les autres hubs. Se complète seul quand ses six facettes le sont.",
+      "icon": "crown",
+      "x": 0,
+      "y": -72,
+      "theme": {
+        "color": "#c8b6ff",
+        "glow": "#e4dcff",
+        "size": 1.2
+      },
+      "reward": {
+        "xp": 200,
+        "badge": "Visionnaire"
+      },
+      "sort": 0,
+      "meta": {
+        "central": true
+      },
+      "conditions": [
+        {
+          "uid": "ent_c001",
+          "phase": "complete",
+          "type": "all",
+          "params": {
+            "nodes": [
+              "ent_n_vision_1",
+              "ent_n_vision_2",
+              "ent_n_vision_3",
+              "ent_n_vision_4",
+              "ent_n_vision_5",
+              "ent_n_vision_6"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_vision_1",
+      "parent": "ent_h_vision",
+      "kind": "node",
+      "slug": "vision-mission-ecrite",
+      "name": "Mission écrite",
+      "description": "",
+      "icon": null,
+      "x": -36,
+      "y": -134.4,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c002",
+          "phase": "unlock",
+          "type": "node",
+          "params": {
+            "node": "ent_n_origin"
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_vision_2",
+      "parent": "ent_h_vision",
+      "kind": "node",
+      "slug": "vision-valeurs-partagees",
+      "name": "Valeurs partagées",
+      "description": "",
+      "icon": null,
+      "x": 36,
+      "y": -134.4,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c003",
+          "phase": "unlock",
+          "type": "node",
+          "params": {
+            "node": "ent_n_origin"
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_vision_3",
+      "parent": "ent_h_vision",
+      "kind": "node",
+      "slug": "vision-positionnement-clair",
+      "name": "Positionnement clair",
+      "description": "",
+      "icon": null,
+      "x": 72,
+      "y": -72,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c004",
+          "phase": "unlock",
+          "type": "node",
+          "params": {
+            "node": "ent_n_origin"
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_vision_4",
+      "parent": "ent_h_vision",
+      "kind": "node",
+      "slug": "vision-ambition-chiffree",
+      "name": "Ambition chiffrée",
+      "description": "Se complète seul dès que le chiffre d'affaires annuel atteint 100 000 €.",
+      "icon": null,
+      "x": 50.9,
+      "y": -21.1,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 3,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c005",
+          "phase": "unlock",
+          "type": "node",
+          "params": {
+            "node": "ent_n_origin"
+          }
+        },
+        {
+          "uid": "ent_c006",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "ca_annuel",
+            "op": ">=",
+            "value": 100000
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_vision_5",
+      "parent": "ent_h_vision",
+      "kind": "node",
+      "slug": "vision-objectifs-a-3-ans",
+      "name": "Objectifs à 3 ans",
+      "description": "",
+      "icon": null,
+      "x": -50.9,
+      "y": -21.1,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 4,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c007",
+          "phase": "unlock",
+          "type": "node",
+          "params": {
+            "node": "ent_n_origin"
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_vision_6",
+      "parent": "ent_h_vision",
+      "kind": "node",
+      "slug": "vision-raison-d-etre",
+      "name": "Raison d’être",
+      "description": "",
+      "icon": null,
+      "x": -72,
+      "y": -72,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 5,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c008",
+          "phase": "unlock",
+          "type": "node",
+          "params": {
+            "node": "ent_n_origin"
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_h_marketing",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "marketing",
+      "name": "Marketing",
+      "description": "Domaine « Marketing ».",
+      "icon": "globe",
+      "x": 0,
+      "y": 446.3,
+      "theme": {
+        "color": "#ff7a59",
+        "glow": "#ff7a59"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Marketing"
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_marketing_1_1",
+      "parent": "ent_h_marketing",
+      "kind": "node",
+      "slug": "marketing-persona-defini",
+      "name": "Persona défini",
+      "description": "",
+      "icon": null,
+      "x": 32.6,
+      "y": 505.9,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_marketing_1_2",
+      "parent": "ent_n_marketing_1_1",
+      "kind": "node",
+      "slug": "marketing-ligne-editoriale",
+      "name": "Ligne éditoriale",
+      "description": "",
+      "icon": null,
+      "x": 61.3,
+      "y": 541.8,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_marketing_1_3",
+      "parent": "ent_n_marketing_1_2",
+      "kind": "node",
+      "slug": "marketing-10-articles-publies",
+      "name": "10 articles publiés",
+      "description": "",
+      "icon": null,
+      "x": 95.9,
+      "y": 572.2,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c009",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "posts_published",
+            "op": ">=",
+            "value": 10
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_marketing_1_4",
+      "parent": "ent_n_marketing_1_3",
+      "kind": "node",
+      "slug": "marketing-calendrier-editorial-annuel",
+      "name": "Calendrier éditorial annuel",
+      "description": "",
+      "icon": null,
+      "x": 135.2,
+      "y": 596.1,
+      "theme": {},
+      "reward": {
+        "xp": 40
+      },
+      "sort": 3,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_marketing_2_1",
+      "parent": "ent_h_marketing",
+      "kind": "node",
+      "slug": "marketing-site-vitrine-en-ligne",
+      "name": "Site vitrine en ligne",
+      "description": "",
+      "icon": null,
+      "x": 0,
+      "y": 514.3,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_marketing_2_2",
+      "parent": "ent_n_marketing_2_1",
+      "kind": "node",
+      "slug": "marketing-seo-de-base",
+      "name": "SEO de base",
+      "description": "",
+      "icon": null,
+      "x": 0,
+      "y": 560.3,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_marketing_2_3",
+      "parent": "ent_n_marketing_2_2",
+      "kind": "node",
+      "slug": "marketing-premier-lead-entrant",
+      "name": "Premier lead entrant",
+      "description": "",
+      "icon": null,
+      "x": 0,
+      "y": 606.3,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 12,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c010",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "leads",
+            "op": ">=",
+            "value": 1
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_marketing_3_1",
+      "parent": "ent_h_marketing",
+      "kind": "node",
+      "slug": "marketing-charte-graphique",
+      "name": "Charte graphique",
+      "description": "",
+      "icon": null,
+      "x": -32.6,
+      "y": 505.9,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 20,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_marketing_3_2",
+      "parent": "ent_n_marketing_3_1",
+      "kind": "node",
+      "slug": "marketing-kit-reseaux-sociaux",
+      "name": "Kit réseaux sociaux",
+      "description": "",
+      "icon": null,
+      "x": -61.3,
+      "y": 541.8,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 21,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_h_ventes",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "ventes",
+      "name": "Ventes",
+      "description": "Domaine « Ventes ».",
+      "icon": "chart",
+      "x": -111.5,
+      "y": 285.8,
+      "theme": {
+        "color": "#ffb547",
+        "glow": "#ffb547"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Ventes"
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_ventes_1_1",
+      "parent": "ent_h_ventes",
+      "kind": "node",
+      "slug": "ventes-offre-formalisee",
+      "name": "Offre formalisée",
+      "description": "",
+      "icon": null,
+      "x": -119.8,
+      "y": 353.3,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_ventes_1_2",
+      "parent": "ent_n_ventes_1_1",
+      "kind": "node",
+      "slug": "ventes-grille-tarifaire",
+      "name": "Grille tarifaire",
+      "description": "",
+      "icon": null,
+      "x": -121.4,
+      "y": 399.3,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_ventes_1_3",
+      "parent": "ent_n_ventes_1_2",
+      "kind": "node",
+      "slug": "ventes-premier-devis-signe",
+      "name": "Premier devis signé",
+      "description": "",
+      "icon": null,
+      "x": -119,
+      "y": 445.2,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c011",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "deals_won",
+            "op": ">=",
+            "value": 1
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_ventes_2_1",
+      "parent": "ent_h_ventes",
+      "kind": "node",
+      "slug": "ventes-pipeline-crm",
+      "name": "Pipeline CRM",
+      "description": "",
+      "icon": null,
+      "x": -151.2,
+      "y": 341,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_ventes_2_2",
+      "parent": "ent_n_ventes_2_1",
+      "kind": "node",
+      "slug": "ventes-relances-systematiques",
+      "name": "Relances systématiques",
+      "description": "",
+      "icon": null,
+      "x": -181.1,
+      "y": 375.9,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_ventes_2_3",
+      "parent": "ent_n_ventes_2_2",
+      "kind": "node",
+      "slug": "ventes-10-clients-signes",
+      "name": "10 clients signés",
+      "description": "Requiert les relances ET un premier devis signé (unlock all), puis 10 ventes (metric).",
+      "icon": null,
+      "x": -214.1,
+      "y": 408.1,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 12,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c012",
+          "phase": "unlock",
+          "type": "all",
+          "params": {
+            "nodes": [
+              "ent_n_ventes_2_2",
+              "ent_n_ventes_1_3"
+            ]
+          }
+        },
+        {
+          "uid": "ent_c013",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "deals_won",
+            "op": ">=",
+            "value": 10
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_ventes_2_4",
+      "parent": "ent_n_ventes_2_3",
+      "kind": "node",
+      "slug": "ventes-process-de-vente-documente",
+      "name": "Process de vente documenté",
+      "description": "",
+      "icon": null,
+      "x": -249.6,
+      "y": 437.2,
+      "theme": {},
+      "reward": {
+        "xp": 40
+      },
+      "sort": 13,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c014",
+          "phase": "complete",
+          "type": "manual",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "uid": "ent_h_operations",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "operations",
+      "name": "Opérations",
+      "description": "Domaine « Opérations ».",
+      "icon": "layers",
+      "x": -401.1,
+      "y": -17.7,
+      "theme": {
+        "color": "#5ad1a5",
+        "glow": "#5ad1a5"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Opérations"
+      },
+      "sort": 3,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_operations_1_1",
+      "parent": "ent_h_operations",
+      "kind": "node",
+      "slug": "operations-process-cartographies",
+      "name": "Process cartographiés",
+      "description": "",
+      "icon": null,
+      "x": -462.2,
+      "y": 12.2,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_operations_1_2",
+      "parent": "ent_n_operations_1_1",
+      "kind": "node",
+      "slug": "operations-outils-centralises",
+      "name": "Outils centralisés",
+      "description": "",
+      "icon": null,
+      "x": -499.3,
+      "y": 39.3,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_operations_1_3",
+      "parent": "ent_n_operations_1_2",
+      "kind": "node",
+      "slug": "operations-automatisations",
+      "name": "Automatisations",
+      "description": "Débloqué quand les outils sont centralisés ET la checklist qualité en place (condition all).",
+      "icon": null,
+      "x": -531.2,
+      "y": 72.5,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c015",
+          "phase": "unlock",
+          "type": "all",
+          "params": {
+            "nodes": [
+              "ent_n_operations_1_2",
+              "ent_n_operations_2_1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_operations_2_1",
+      "parent": "ent_h_operations",
+      "kind": "node",
+      "slug": "operations-checklist-qualite",
+      "name": "Checklist qualité",
+      "description": "",
+      "icon": null,
+      "x": -469.1,
+      "y": -20.7,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_operations_2_2",
+      "parent": "ent_n_operations_2_1",
+      "kind": "node",
+      "slug": "operations-zero-retard-sur-un-mois",
+      "name": "Zéro retard sur un mois",
+      "description": "",
+      "icon": null,
+      "x": -515,
+      "y": -22.7,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c016",
+          "phase": "complete",
+          "type": "manual",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_operations_3_1",
+      "parent": "ent_h_operations",
+      "kind": "node",
+      "slug": "operations-fournisseurs-references",
+      "name": "Fournisseurs référencés",
+      "description": "",
+      "icon": null,
+      "x": -459.3,
+      "y": -52.9,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 20,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_operations_3_2",
+      "parent": "ent_n_operations_3_1",
+      "kind": "node",
+      "slug": "operations-contrats-cadres",
+      "name": "Contrats cadres",
+      "description": "",
+      "icon": null,
+      "x": -493.9,
+      "y": -83.2,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 21,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_h_intelligence",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "intelligence",
+      "name": "Intelligence",
+      "description": "Domaine « Intelligence ».",
+      "icon": "database",
+      "x": -272.8,
+      "y": -301.9,
+      "theme": {
+        "color": "#7aa7ff",
+        "glow": "#7aa7ff"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Intelligence"
+      },
+      "sort": 4,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_intelligence_1_1",
+      "parent": "ent_h_intelligence",
+      "kind": "node",
+      "slug": "intelligence-tableau-de-bord",
+      "name": "Tableau de bord",
+      "description": "",
+      "icon": null,
+      "x": -329.5,
+      "y": -339.5,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_intelligence_1_2",
+      "parent": "ent_n_intelligence_1_1",
+      "kind": "node",
+      "slug": "intelligence-kpis-hebdomadaires",
+      "name": "KPIs hebdomadaires",
+      "description": "",
+      "icon": null,
+      "x": -369.9,
+      "y": -361.5,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_intelligence_1_3",
+      "parent": "ent_n_intelligence_1_2",
+      "kind": "node",
+      "slug": "intelligence-veille-concurrentielle",
+      "name": "Veille concurrentielle",
+      "description": "",
+      "icon": null,
+      "x": -412,
+      "y": -379.8,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_intelligence_2_1",
+      "parent": "ent_h_intelligence",
+      "kind": "node",
+      "slug": "intelligence-donnees-clients-centralisees",
+      "name": "Données clients centralisées",
+      "description": "",
+      "icon": null,
+      "x": -304.5,
+      "y": -362,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_intelligence_2_2",
+      "parent": "ent_n_intelligence_2_1",
+      "kind": "node",
+      "slug": "intelligence-segmentation",
+      "name": "Segmentation",
+      "description": "",
+      "icon": null,
+      "x": -322.3,
+      "y": -404.5,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_intelligence_2_3",
+      "parent": "ent_n_intelligence_2_2",
+      "kind": "node",
+      "slug": "intelligence-previsions",
+      "name": "Prévisions",
+      "description": "Croise segmentation client et trésorerie (condition all, pont entre Intelligence et Finances).",
+      "icon": null,
+      "x": -336.3,
+      "y": -448.3,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 12,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c017",
+          "phase": "unlock",
+          "type": "all",
+          "params": {
+            "nodes": [
+              "ent_n_intelligence_2_2",
+              "ent_n_finances_1_2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_h_clients",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "clients",
+      "name": "Clients",
+      "description": "Domaine « Clients ».",
+      "icon": "users",
+      "x": -16.8,
+      "y": -189.3,
+      "theme": {
+        "color": "#ff5c8a",
+        "glow": "#ff5c8a"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Clients"
+      },
+      "sort": 5,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_clients_1_1",
+      "parent": "ent_h_clients",
+      "kind": "node",
+      "slug": "clients-onboarding-client",
+      "name": "Onboarding client",
+      "description": "",
+      "icon": null,
+      "x": -65,
+      "y": -237.3,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_clients_1_2",
+      "parent": "ent_n_clients_1_1",
+      "kind": "node",
+      "slug": "clients-questionnaire-satisfaction",
+      "name": "Questionnaire satisfaction",
+      "description": "",
+      "icon": null,
+      "x": -100.4,
+      "y": -266.7,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_clients_1_3",
+      "parent": "ent_n_clients_1_2",
+      "kind": "node",
+      "slug": "clients-nps-40",
+      "name": "NPS ≥ 40",
+      "description": "",
+      "icon": null,
+      "x": -138.2,
+      "y": -292.9,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c018",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "nps",
+            "op": ">=",
+            "value": 40
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_clients_2_1",
+      "parent": "ent_h_clients",
+      "kind": "node",
+      "slug": "clients-support-structure",
+      "name": "Support structuré",
+      "description": "",
+      "icon": null,
+      "x": -36.2,
+      "y": -254.5,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_clients_2_2",
+      "parent": "ent_n_clients_2_1",
+      "kind": "node",
+      "slug": "clients-faq-publique",
+      "name": "FAQ publique",
+      "description": "",
+      "icon": null,
+      "x": -45.3,
+      "y": -299.6,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_h_finances",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "finances",
+      "name": "Finances",
+      "description": "Domaine « Finances ».",
+      "icon": "gem",
+      "x": 16.8,
+      "y": -189.3,
+      "theme": {
+        "color": "#f2d45c",
+        "glow": "#f2d45c"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Finances"
+      },
+      "sort": 6,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_finances_1_1",
+      "parent": "ent_h_finances",
+      "kind": "node",
+      "slug": "finances-budget-previsionnel",
+      "name": "Budget prévisionnel",
+      "description": "",
+      "icon": null,
+      "x": 36.2,
+      "y": -254.5,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_finances_1_2",
+      "parent": "ent_n_finances_1_1",
+      "kind": "node",
+      "slug": "finances-suivi-de-tresorerie",
+      "name": "Suivi de trésorerie",
+      "description": "",
+      "icon": null,
+      "x": 45.3,
+      "y": -299.6,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_finances_1_3",
+      "parent": "ent_n_finances_1_2",
+      "kind": "node",
+      "slug": "finances-3-mois-de-reserve",
+      "name": "3 mois de réserve",
+      "description": "",
+      "icon": null,
+      "x": 50.5,
+      "y": -345.3,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c019",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "tresorerie_mois",
+            "op": ">=",
+            "value": 3
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_finances_2_1",
+      "parent": "ent_h_finances",
+      "kind": "node",
+      "slug": "finances-facturation-automatisee",
+      "name": "Facturation automatisée",
+      "description": "",
+      "icon": null,
+      "x": 65,
+      "y": -237.3,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_finances_2_2",
+      "parent": "ent_n_finances_2_1",
+      "kind": "node",
+      "slug": "finances-abonnement-regle",
+      "name": "Abonnement réglé",
+      "description": "Condition callback « has_paid » évaluée par l'hôte (reste verrouillée dans la démo statique).",
+      "icon": null,
+      "x": 100.4,
+      "y": -266.7,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c020",
+          "phase": "complete",
+          "type": "callback",
+          "params": {
+            "name": "has_paid"
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_h_equipe",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "equipe",
+      "name": "Équipe",
+      "description": "Domaine « Équipe ».",
+      "icon": "flag",
+      "x": 272.8,
+      "y": -301.9,
+      "theme": {
+        "color": "#b18cff",
+        "glow": "#b18cff"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Équipe"
+      },
+      "sort": 7,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_equipe_1_1",
+      "parent": "ent_h_equipe",
+      "kind": "node",
+      "slug": "equipe-roles-clarifies",
+      "name": "Rôles clarifiés",
+      "description": "",
+      "icon": null,
+      "x": 288.6,
+      "y": -368,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_equipe_1_2",
+      "parent": "ent_n_equipe_1_1",
+      "kind": "node",
+      "slug": "equipe-rituels-d-equipe",
+      "name": "Rituels d’équipe",
+      "description": "",
+      "icon": null,
+      "x": 291.4,
+      "y": -413.9,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_equipe_1_3",
+      "parent": "ent_n_equipe_1_2",
+      "kind": "node",
+      "slug": "equipe-entretiens-annuels",
+      "name": "Entretiens annuels",
+      "description": "",
+      "icon": null,
+      "x": 286.1,
+      "y": -459.6,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_equipe_2_1",
+      "parent": "ent_h_equipe",
+      "kind": "node",
+      "slug": "equipe-premier-recrutement",
+      "name": "Premier recrutement",
+      "description": "",
+      "icon": null,
+      "x": 318.4,
+      "y": -352.3,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_equipe_2_2",
+      "parent": "ent_n_equipe_2_1",
+      "kind": "node",
+      "slug": "equipe-onboarding-interne",
+      "name": "Onboarding interne",
+      "description": "",
+      "icon": null,
+      "x": 349.2,
+      "y": -386.5,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_equipe_2_3",
+      "parent": "ent_n_equipe_2_2",
+      "kind": "node",
+      "slug": "equipe-culture-ecrite",
+      "name": "Culture écrite",
+      "description": "",
+      "icon": null,
+      "x": 380.1,
+      "y": -420.6,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 12,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c021",
+          "phase": "complete",
+          "type": "manual",
+          "params": {}
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_equipe_3_1",
+      "parent": "ent_h_equipe",
+      "kind": "node",
+      "slug": "equipe-plan-de-formation",
+      "name": "Plan de formation",
+      "description": "",
+      "icon": null,
+      "x": 337,
+      "y": -324.3,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 20,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_equipe_3_2",
+      "parent": "ent_n_equipe_3_1",
+      "kind": "node",
+      "slug": "equipe-mentorat",
+      "name": "Mentorat",
+      "description": "",
+      "icon": null,
+      "x": 382.4,
+      "y": -331.7,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 21,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_h_produit",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "produit",
+      "name": "Produit",
+      "description": "Domaine « Produit ».",
+      "icon": "bolt",
+      "x": 401.1,
+      "y": -17.7,
+      "theme": {
+        "color": "#4fd6e8",
+        "glow": "#4fd6e8"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Produit"
+      },
+      "sort": 8,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_produit_1_1",
+      "parent": "ent_h_produit",
+      "kind": "node",
+      "slug": "produit-probleme-valide",
+      "name": "Problème validé",
+      "description": "",
+      "icon": null,
+      "x": 466.2,
+      "y": -37.4,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_produit_1_2",
+      "parent": "ent_n_produit_1_1",
+      "kind": "node",
+      "slug": "produit-mvp-livre",
+      "name": "MVP livré",
+      "description": "",
+      "icon": null,
+      "x": 508.9,
+      "y": -54.6,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_produit_1_3",
+      "parent": "ent_n_produit_1_2",
+      "kind": "node",
+      "slug": "produit-10-utilisateurs-actifs",
+      "name": "10 utilisateurs actifs",
+      "description": "",
+      "icon": null,
+      "x": 549.9,
+      "y": -75.4,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 2,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c022",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "active_users",
+            "op": ">=",
+            "value": 10
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_produit_1_4",
+      "parent": "ent_n_produit_1_3",
+      "kind": "node",
+      "slug": "produit-roadmap-publique",
+      "name": "Roadmap publique",
+      "description": "",
+      "icon": null,
+      "x": 589,
+      "y": -99.7,
+      "theme": {},
+      "reward": {
+        "xp": 40
+      },
+      "sort": 3,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_produit_2_1",
+      "parent": "ent_h_produit",
+      "kind": "node",
+      "slug": "produit-retours-collectes",
+      "name": "Retours collectés",
+      "description": "",
+      "icon": null,
+      "x": 467.7,
+      "y": -3.8,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_produit_2_2",
+      "parent": "ent_n_produit_2_1",
+      "kind": "node",
+      "slug": "produit-iteration-v2",
+      "name": "Itération v2",
+      "description": "Débloqué par 2 sources de retours parmi 3 (condition any, min 2).",
+      "icon": null,
+      "x": 511.7,
+      "y": 9.5,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c023",
+          "phase": "unlock",
+          "type": "any",
+          "params": {
+            "nodes": [
+              "ent_n_produit_2_1",
+              "ent_n_clients_1_2",
+              "ent_n_clients_2_2"
+            ],
+            "min": 2
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_h_sante",
+      "parent": "ent_n_origin",
+      "kind": "hub",
+      "slug": "sante",
+      "name": "Santé",
+      "description": "Domaine « Santé ».",
+      "icon": "leaf",
+      "x": 111.5,
+      "y": 285.8,
+      "theme": {
+        "color": "#7ee07a",
+        "glow": "#7ee07a"
+      },
+      "reward": {
+        "xp": 100,
+        "badge": "Santé"
+      },
+      "sort": 9,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_sante_1_1",
+      "parent": "ent_h_sante",
+      "kind": "node",
+      "slug": "sante-routine-de-sommeil",
+      "name": "Routine de sommeil",
+      "description": "",
+      "icon": null,
+      "x": 151.2,
+      "y": 341,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 0,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_sante_1_2",
+      "parent": "ent_n_sante_1_1",
+      "kind": "node",
+      "slug": "sante-sport-3-semaine",
+      "name": "Sport 3×/semaine",
+      "description": "",
+      "icon": null,
+      "x": 181.1,
+      "y": 375.9,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 1,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c024",
+          "phase": "complete",
+          "type": "metric",
+          "params": {
+            "metric": "workouts_week",
+            "op": ">=",
+            "value": 3
+          }
+        }
+      ]
+    },
+    {
+      "uid": "ent_n_sante_2_1",
+      "parent": "ent_h_sante",
+      "kind": "node",
+      "slug": "sante-pauses-planifiees",
+      "name": "Pauses planifiées",
+      "description": "",
+      "icon": null,
+      "x": 119.8,
+      "y": 353.3,
+      "theme": {},
+      "reward": {
+        "xp": 10
+      },
+      "sort": 10,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_sante_2_2",
+      "parent": "ent_n_sante_2_1",
+      "kind": "node",
+      "slug": "sante-conges-poses",
+      "name": "Congés posés",
+      "description": "",
+      "icon": null,
+      "x": 121.4,
+      "y": 399.3,
+      "theme": {},
+      "reward": {
+        "xp": 20
+      },
+      "sort": 11,
+      "meta": {},
+      "conditions": []
+    },
+    {
+      "uid": "ent_n_sante_2_3",
+      "parent": "ent_n_sante_2_2",
+      "kind": "node",
+      "slug": "sante-equilibre-durable",
+      "name": "Équilibre durable",
+      "description": "Se complète seul quand sommeil ET sport sont acquis (condition all, pont entre branches).",
+      "icon": null,
+      "x": 119,
+      "y": 445.2,
+      "theme": {},
+      "reward": {
+        "xp": 30
+      },
+      "sort": 12,
+      "meta": {},
+      "conditions": [
+        {
+          "uid": "ent_c025",
+          "phase": "complete",
+          "type": "all",
+          "params": {
+            "nodes": [
+              "ent_n_sante_1_1",
+              "ent_n_sante_1_2"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "uid": "ent_l_ring_0",
+      "from": "ent_h_marketing",
+      "to": "ent_h_ventes",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_ring_1",
+      "from": "ent_h_ventes",
+      "to": "ent_h_operations",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_ring_2",
+      "from": "ent_h_operations",
+      "to": "ent_h_intelligence",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_ring_3",
+      "from": "ent_h_intelligence",
+      "to": "ent_h_clients",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_ring_4",
+      "from": "ent_h_clients",
+      "to": "ent_h_finances",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_ring_5",
+      "from": "ent_h_finances",
+      "to": "ent_h_equipe",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_ring_6",
+      "from": "ent_h_equipe",
+      "to": "ent_h_produit",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_ring_7",
+      "from": "ent_h_produit",
+      "to": "ent_h_sante",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_ring_8",
+      "from": "ent_h_sante",
+      "to": "ent_h_marketing",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_bridge_1",
+      "from": "ent_n_operations_2_1",
+      "to": "ent_n_operations_1_3",
+      "type": "path"
+    },
+    {
+      "uid": "ent_l_bridge_2",
+      "from": "ent_n_finances_1_2",
+      "to": "ent_n_intelligence_2_3",
+      "type": "path"
+    },
+    {
+      "uid": "ent_l_bridge_3",
+      "from": "ent_n_clients_1_2",
+      "to": "ent_n_produit_2_2",
+      "type": "path"
+    },
+    {
+      "uid": "ent_l_bridge_4",
+      "from": "ent_n_clients_2_2",
+      "to": "ent_n_produit_2_2",
+      "type": "path"
+    },
+    {
+      "uid": "ent_l_bridge_6",
+      "from": "ent_n_sante_1_2",
+      "to": "ent_n_sante_2_3",
+      "type": "visual"
+    },
+    {
+      "uid": "ent_l_bridge_5",
+      "from": "ent_n_ventes_1_3",
+      "to": "ent_n_ventes_2_3",
+      "type": "path"
+    }
+  ],
+  "subject": "demo",
+  "metrics": {
+    "posts_published": 12,
+    "leads": 3,
+    "deals_won": 4,
+    "nps": 32,
+    "tresorerie_mois": 2,
+    "active_users": 14,
+    "workouts_week": 2,
+    "ca_annuel": 60000
+  },
+  "permissions": {
+    "edit": true,
+    "progress": true
+  }
+}

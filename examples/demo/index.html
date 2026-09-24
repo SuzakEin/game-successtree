@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SuccessTree — démo cœur</title>
+  <link rel="stylesheet" href="../../assets/successtree.css">
+  <style>
+    :root { color-scheme: dark; }
+    html, body { margin: 0; height: 100%; background: #1d1e45; color: #eeeaff; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 16px; }
+    .bar h1 { font-size: 1rem; font-weight: 600; margin: 0; letter-spacing: .02em; }
+    .bar p { margin: 0; font-size: .85rem; opacity: .75; }
+    .modes { display: inline-flex; border: 1px solid rgba(200, 182, 255, .45); border-radius: 999px; overflow: hidden; }
+    .modes button { font: inherit; font-size: .9rem; color: inherit; background: transparent; border: 0; padding: 6px 16px; cursor: pointer; }
+    .modes button[aria-pressed="true"] { background: #c8b6ff; color: #1d1e45; }
+    .modes button:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+    #tree { height: calc(100vh - 64px); min-height: 420px; }
+    .notice { max-width: 640px; margin: 10vh auto; padding: 24px; border: 1px solid rgba(200, 182, 255, .4); border-radius: 12px; line-height: 1.5; }
+    .notice code { background: rgba(255, 255, 255, .08); padding: 2px 6px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <div>
+      <h1>SuccessTree — cœur de l'entreprise</h1>
+      <p>9 domaines + 1 hub central « Vision ». Cliquez sur « Départ », puis sur « Vision » pour la déployer.</p>
+    </div>
+    <div class="modes" role="group" aria-label="Mode">
+      <button type="button" data-mode="play" aria-pressed="true">Jouer</button>
+      <button type="button" data-mode="build" aria-pressed="false">Construire</button>
+    </div>
+  </div>
+  <div id="tree"></div>
+
+  <script src="../../assets/successtree.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var el = document.getElementById('tree');
+    var buttons = document.querySelectorAll('.modes button');
+    var view = null;
+    var data = null;
+
+    function notice(html) {
+      el.innerHTML = '<div class="notice">' + html + '</div>';
+    }
+
+    function setMode(edit) {
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String((b.dataset.mode === 'build') === edit));
+      });
+      if (!view) return;
+      if (typeof view.setEdit === 'function') {
+        view.setEdit(edit);
+      } else {
+        // Repli : remonter la vue avec l'option edit (en conservant les modifications en cours).
+        var current = typeof view.getData === 'function' ? view.getData() : data;
+        view.destroy();
+        view = mount(current, edit);
+      }
+    }
+
+    function mount(json, edit) {
+      return window.SuccessTree.mount(el, {
+        data: json,
+        edit: edit,
+        onSave: function (payload) {
+          // Démo sans backend : on se contente d'afficher le JSON produit.
+          console.log('Payload à envoyer à l\'action save :', payload);
+        }
+      });
+    }
+
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { setMode(b.dataset.mode === 'build'); });
+    });
+
+    if (!window.SuccessTree || typeof window.SuccessTree.mount !== 'function') {
+      notice('Le fichier <code>assets/successtree.js</code> est introuvable. Ouvrez cette page depuis le dépôt complet.');
+      return;
+    }
+
+    fetch('heart-tree.json', { cache: 'no-cache' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (json) {
+        data = json;
+        view = mount(json, false);
+      })
+      .catch(function () {
+        var local = location.protocol === 'file:';
+        notice(
+          '<strong>Impossible de charger <code>heart-tree.json</code>.</strong><br>' +
+          (local ? 'Les navigateurs bloquent <code>fetch()</code> sur une page ouverte en <code>file://</code>.<br>' : '') +
+          'Lancez un serveur à la racine du dépôt :<br><code>php -S localhost:8000</code><br>' +
+          'puis ouvrez <code>http://localhost:8000/examples/demo/</code>.'
+        );
+      });
+  })();
+  </script>
+</body>
+</html>
