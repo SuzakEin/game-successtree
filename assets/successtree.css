@@ -75,6 +75,7 @@
 .st-to-locked .st-link-line { stroke-dasharray: 3 5; stroke-opacity: .45; }
 .st-link-visual .st-link-line { stroke-dasharray: 1 6; stroke-opacity: .55; }
 .st-to-completed .st-link-line { stroke: var(--c, var(--st-line)); stroke-opacity: .75; stroke-width: 1.4; }
+.st-link-root.st-to-completed .st-link-line { stroke: var(--st-line); stroke-opacity: .32; stroke-width: 1; }
 .st-link.st-lit .st-link-line { stroke: var(--c, #fff); stroke-opacity: 1; stroke-width: 1.7; }
 .st-link.st-lit.st-to-locked .st-link-line { stroke-opacity: .55; }
 .st-link.st-selected .st-link-line { stroke: var(--st-accent); stroke-width: 2.5; stroke-opacity: 1; }
@@ -106,6 +107,7 @@
 .st-node:hover .st-dot, .st-node:focus-visible .st-dot { stroke: #fff; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
 
 /* hubs */
+.st-halo, .st-pulse, .st-glow, .st-badge, .st-ring { pointer-events: none; }
 .st-hub .st-halo { opacity: .95; transition: opacity .5s ease; }
 .st-hub.st-locked .st-halo { opacity: .28; }
 .st-hub .st-ring { fill: none; stroke: var(--c); stroke-opacity: .55; stroke-width: 1; vector-effect: non-scaling-stroke; }
@@ -130,6 +132,11 @@
 
 /* origine */
 .st-origin .st-dot { fill: #fff; }
+.st-origin.st-available .st-dot { fill: var(--st-accent); }
+.st-origin.st-available .st-origin-ring { stroke: var(--st-accent); stroke-opacity: .85; }
+.st-origin .st-pulse { stroke: var(--st-accent); }
+.st-label-origin .st-label-title { font-family: var(--st-font-title) !important; letter-spacing: .18em !important; font-size: 11px !important; text-transform: uppercase; }
+.st-label-origin.st-available .st-label-title { fill: var(--st-accent) !important; }
 .st-origin .st-origin-ring {
   fill: none;
   stroke: rgba(233, 228, 245, .55);
@@ -570,6 +577,8 @@
 .st-tool-primary { background: var(--st-hub); color: var(--st-hub-ink); font-weight: 700; margin-left: 4px; }
 .st-tool-primary:hover:not(:disabled) { background: #fff; }
 .st-tool-primary.st-dirty { background: var(--st-accent); color: #2a1208; box-shadow: 0 0 18px rgba(255, 122, 89, .55); }
+.st-compact-tools .st-tool:not(.st-tool-primary) .st-tool-label { display: none; }
+.st-compact-tools .st-tool:not(.st-tool-primary) { padding: 8px 9px; }
 .st-tool-sep { width: 1px; align-self: stretch; margin: 6px 4px; background: var(--st-panel-border); flex: none; }
 .st-hint {
   position: absolute;

@@ -53,6 +53,7 @@
     ed_link_visual: 'Visuel seul', ed_importError: 'Import impossible : {msg}', ed_imported: 'Arbre importé',
     ed_nothingToUndo: 'Rien à annuler', ed_heartNeed: 'Aucun hub à positionner', ed_heartDone: 'Preset cœur appliqué',
     ed_hint: 'Glissez pour déplacer · Maj+clic pour lier · Suppr pour effacer', ed_noSelection: 'Sélectionnez un nœud pour éditer ses propriétés.',
+    ed_treeKicker: 'Arbre', ed_layout: 'Disposition', ed_settings: 'Réglages (JSON)',
     ed_invalidConditions: 'Conditions invalides : {msg}', ed_from: 'De', ed_to: 'Vers', remove: 'Retirer',
     phase_unlock: 'Déblocage', phase_complete: 'Validation',
     ctype_parent: 'Parent complété', ctype_node: 'Nœud complété', ctype_all: 'Tous complétés', ctype_any: 'Au moins N',
@@ -572,6 +573,7 @@
       this._makeStars();
       this.mobile = W < 640;
       this.root.classList.toggle('st-mobile', this.mobile);
+      this._updateCompact();
       if (this.data && (first || !this._userMoved) && !this.slots.cur.uid) this._fitAll(false);
       this._dirtyCam = true; this._bgDirty = true;
     }
@@ -654,10 +656,7 @@
     var prevSel = this.selected;
     this.data = normalizeData(d);
     if (!this.slug && this.data.tree.slug) this.slug = this.data.tree.slug;
-    this.settings = assign({}, DEFAULT_SETTINGS, isObj(this.data.tree.settings) ? this.data.tree.settings : {}, this.opts.settings || {});
-    this.settings.expandPush = num(this.settings.expandPush) || 1.6;
-    this.settings.hubRadius = num(this.settings.hubRadius) || 34;
-    this.settings.nodeRadius = num(this.settings.nodeRadius) || 9;
+    this._normSettings();
     this._applyTheme();
     this._recompute(!!o.evaluate);
     if (this.selected && !this.idx.by[this.selected]) this.selected = null;
@@ -675,6 +674,17 @@
     if (this.editing) { this._renderToolbar(); if (prevSel !== this.selected) this._refreshPanel(); }
     this.emit('load', this.api);
     return this;
+  };
+
+  View.prototype._normSettings = function () {
+    var S = this.settings = assign({}, DEFAULT_SETTINGS, isObj(this.data.tree.settings) ? this.data.tree.settings : {}, this.opts.settings || {});
+    Object.keys(DEFAULT_SETTINGS).forEach(function (k) {
+      if (typeof DEFAULT_SETTINGS[k] === 'number') { var v = num(S[k]); S[k] = v == null || v < 0 ? DEFAULT_SETTINGS[k] : v; }
+    });
+    if (!S.expandPush) S.expandPush = 1.6;
+    if (!S.hubRadius) S.hubRadius = 34;
+    if (!S.nodeRadius) S.nodeRadius = 9;
+    if (['hover', 'always', 'never'].indexOf(S.showLabels) < 0) S.showLabels = 'hover';
   };
 
   View.prototype._recompute = function (evaluate) {
@@ -698,8 +708,9 @@
     var map = { background: '--st-bg', background2: '--st-bg2', accent: '--st-accent', line: '--st-line', hub: '--st-hub', hubInk: '--st-hub-ink', text: '--st-text' };
     var st = this.root.style;
     Object.keys(map).forEach(function (k) { var c = safeColor(th[k]); if (c) st.setProperty(map[k], c); else st.removeProperty(map[k]); });
-    var ft = safeFont(th.font || th.fontTitle); if (ft) st.setProperty('--st-font-title', ft); else st.removeProperty('--st-font-title');
-    var fb = safeFont(th.fontBody); if (fb) st.setProperty('--st-font', fb); else st.removeProperty('--st-font');
+    // theme.font = police du texte courant ; theme.fontTitle (ou titleFont) = police des titres (serif « Cinzel » par défaut)
+    var ft = safeFont(th.fontTitle || th.titleFont); if (ft) st.setProperty('--st-font-title', ft); else st.removeProperty('--st-font-title');
+    var fb = safeFont(th.font || th.fontBody); if (fb) st.setProperty('--st-font', fb); else st.removeProperty('--st-font');
     var cs = win.getComputedStyle ? win.getComputedStyle(this.root) : null;
     this.accent = (cs && safeColor(cs.getPropertyValue('--st-accent'))) || '#ff7a59';
     this._bgDirty = true;
@@ -777,7 +788,7 @@
     }
     this.central = centralUid;
 
-    var L0 = num(S.branchLength) || R * 0.23;
+    var L0 = num(S.branchLength) || R * 0.27;
     var Lc = num(S.centralLength) || R * 0.32;
     var spread0 = (num(S.spread) || 110) * Math.PI / 180;
     var queue = data.nodes.filter(function (n) { return !idx.eff[n.uid]; }).map(function (n) { return n.uid; });
@@ -823,14 +834,27 @@
     }
     data.nodes.forEach(function (n) { if (!pos[n.uid]) pos[n.uid] = { x: O.x, y: O.y }; });
     this.base = pos; this.dir = dir; this.depth = dep;
+    // facteurs d'échelle du sous-arbre central : replié (compact autour du hub) / déployé (cercle ample)
+    this.centralF = { c: 1, d: 1 };
+    if (centralUid) {
+      var C0 = pos[centralUid];
+      var ds = (idx.kids[centralUid] || []).map(function (u) { return Math.hypot(pos[u].x - C0.x, pos[u].y - C0.y); }).filter(function (v) { return v > 0.5; }).sort(function (a, b) { return a - b; });
+      if (ds.length) {
+        var r1 = ds[Math.floor(ds.length / 2)];
+        var cs = clamp(num(S.centralScale) || 0.55, 0.1, 1);
+        this.centralF = { c: Math.min(1, Math.max(cs, (S.hubRadius * 1.7) / r1)), d: Math.max(1, Lc / r1) };
+      }
+    }
     // label side for hubs
-    var side = {};
+    var side = {}, extra = {}, hubR0 = S.hubRadius;
     data.nodes.forEach(function (n) {
       if (n.kind !== 'hub') return;
       var P = pos[n.uid], dx = P.x - O.x, dy = P.y - O.y, d = Math.hypot(dx, dy);
-      side[n.uid] = n.uid === centralUid || d < 1 ? 1 : (dy / d > 0.35 ? -1 : 1);
+      if (d < hubR0 * 1.2) side[n.uid] = 1;
+      else if (idx.origin && d < hubR0 * 3.2 && dy < 0 && Math.abs(dx) < hubR0) { side[n.uid] = 1; extra[n.uid] = -dy + S.nodeRadius * 1.6; } // origine juste en dessous : titre sous l'origine
+      else side[n.uid] = n.uid === centralUid ? 1 : (dy / d > 0.35 ? -1 : 1);
     });
-    this.labelSide = side;
+    this.labelSide = side; this.labelExtra = extra;
     // l'origine est-elle recouverte par un hub ?
     this.originCovered = false;
     var hubR = S.hubRadius;
@@ -852,10 +876,10 @@
     var B = this.base[u], idx = this.idx, c = this.central, O = this.O;
     if (!c || this.editing) return B;
     var hub = idx.hubOf[u], S = this.settings;
-    var cs = clamp(num(S.centralScale) || 0.55, 0.1, 1);
+    var CF = this.centralF || { c: 1, d: 1 };
     var push = lerp(1, S.expandPush, e);
     if (u === c) return B;
-    if (hub === c) { var C = this.base[c], f = lerp(cs, 1, e); return { x: C.x + (B.x - C.x) * f, y: C.y + (B.y - C.y) * f }; }
+    if (hub === c) { var C = this.base[c], f = lerp(CF.c, CF.d, e); return { x: C.x + (B.x - C.x) * f, y: C.y + (B.y - C.y) * f }; }
     if (idx.origin && u === idx.origin.uid) return B;
     if (hub) { var H = this.base[hub]; return { x: B.x + (H.x - O.x) * (push - 1), y: B.y + (H.y - O.y) * (push - 1) }; }
     return { x: O.x + (B.x - O.x) * push, y: O.y + (B.y - O.y) * push };
@@ -936,10 +960,13 @@
           if (covered) {
             var cr = S.hubRadius * 1.55;
             s('circle', { 'class': 'st-origin-hit', r: cr.toFixed(1) }, g2);
+            if (n.status === 'available') s('circle', { 'class': 'st-pulse', r: cr.toFixed(1) }, g2);
             s('circle', { 'class': 'st-origin-ring', r: cr.toFixed(1) }, g2);
           } else {
-            s('circle', { 'class': 'st-halo', r: (r * 3).toFixed(1), fill: self._grad('#ffffff') }, g2);
-            s('circle', { 'class': 'st-origin-ring', r: (r * 1.6).toFixed(1) }, g2);
+            s('circle', { 'class': 'st-hit', r: (r * 2.2).toFixed(1) }, g2);
+            s('circle', { 'class': 'st-halo', r: (r * 3.2).toFixed(1), fill: self._grad(n.status === 'available' ? self.accent : '#ffffff') }, g2);
+            if (n.status === 'available') s('circle', { 'class': 'st-pulse', r: (r * 1.8).toFixed(1) }, g2);
+            s('circle', { 'class': 'st-origin-ring', r: (r * 1.7).toFixed(1) }, g2);
             s('circle', { 'class': 'st-dot', r: r.toFixed(1) }, g2);
           }
         } else {
@@ -1036,9 +1063,22 @@
   View.prototype.toScreen = function (x, y) { var c = this.cam; return { x: (x - c.x) * c.k + this.W / 2, y: (y - c.y) * c.k + this.H / 2 }; };
   View.prototype.toWorld = function (sx, sy) { var c = this.cam; return { x: c.x + (sx - this.W / 2) / c.k, y: c.y + (sy - this.H / 2) / c.k }; };
 
+  View.prototype._labelWidth = function (lab) {
+    var key = lab.title.textContent + '|' + lab.sub.textContent;
+    if (lab.wKey === key && lab.w) return lab.w;
+    var wt = 0, ws = 0;
+    try { wt = lab.title.getComputedTextLength(); ws = lab.sub.getComputedTextLength(); } catch (e) { wt = 0; }
+    if (!wt) { wt = lab.title.textContent.length * 11; ws = lab.sub.textContent.length * 6; }
+    else lab.wKey = key;
+    lab.w = { title: wt, all: Math.max(wt, ws) };
+    return lab.w;
+  };
+
   View.prototype._applyLabels = function () {
     var self = this, k = this.cam.k, disp = this.disp, showAll = this.settings.showLabels === 'always', never = this.settings.showLabels === 'never';
-    var fs = clamp(0.62 + k * 0.55, 0.78, 1.25);
+    var fs = clamp(0.5 + k * 0.7, 0.66, 1.2);
+    var showSub = k >= 0.42;
+    var hubBoxes = [];
     Object.keys(this.labelEls).forEach(function (u) {
       var lab = self.labelEls[u], d = disp[u], n = self.idx.by[u], rec = self.nodeEls[u];
       if (!d || !n || !rec) return;
@@ -1048,28 +1088,53 @@
       else if (n.kind === 'origin') o = self.originCovered || never ? 0 : d.o;
       else o = never ? 0 : (showAll ? d.o : d.h * d.o);
       if (self.editing && self.selected === u) o = 1;
-      if (p.x < -200 || p.x > self.W + 200 || p.y < -100 || p.y > self.H + 100) o = 0;
+      if (p.x < -300 || p.x > self.W + 300 || p.y < -150 || p.y > self.H + 150) o = 0;
       setA(lab.g, 'opacity', o < 0.02 ? '0' : o.toFixed(3));
       if (o < 0.02) return;
       var r = rec.r * d.s * k;
       if (n.kind === 'hub') {
         var sideSign = self.labelSide[u] || 1;
-        var off = r + (u === self.central && self.originCovered ? self.settings.hubRadius * 0.6 * k : 0) + 12;
+        var off = r + (u === self.central && self.originCovered ? self.settings.hubRadius * 0.62 * k : 0) + ((self.labelExtra[u] || 0) * k) + 10;
         var ty, sy2;
-        if (sideSign > 0) { ty = off + 14 * fs; sy2 = ty + 15 * fs; }
-        else { sy2 = -off - 2; ty = sy2 - 15 * fs; }
-        setA(lab.g, 'transform', 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')');
-        setA(lab.title, 'y', ty.toFixed(1)); setA(lab.sub, 'y', sy2.toFixed(1));
+        if (sideSign > 0) { ty = off + 13 * fs; sy2 = ty + 14 * fs; }
+        else { sy2 = -off - 3; ty = sy2 - 14 * fs; }
+        setA(lab.title, 'y', (ty / fs).toFixed(1)); setA(lab.sub, 'y', (sy2 / fs).toFixed(1));
         setA(lab.title, 'x', '0'); setA(lab.sub, 'x', '0');
-        setA(lab.g, 'font-size', (fs * 100).toFixed(0) + '%');
+        var wT = self._labelWidth(lab);
+        hubBoxes.push({ lab: lab, x: p.x, y: p.y, top: p.y + Math.min(ty, sy2) - 13 * fs, bot: p.y + Math.max(ty, sy2) + 4, w: (showSub ? wT.all : wT.title) * fs + 10, wt: wT.title * fs + 10, sub: showSub, dx: 0 });
       } else {
-        var a = self.dir[u]; if (a == null) a = 0;
-        var right = Math.cos(a) >= -0.2;
-        setA(lab.title, 'text-anchor', right ? 'start' : 'end');
-        setA(lab.title, 'x', ((right ? 1 : -1) * (r + 7)).toFixed(1));
-        setA(lab.title, 'y', '4');
-        setA(lab.g, 'transform', 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ')');
+        var a = self.dir[u]; if (a == null) a = n.kind === 'origin' ? -Math.PI / 2 : 0;
+        var nx = -Math.sin(a), ny = Math.cos(a);
+        if (ny < -0.05 || (Math.abs(ny) <= 0.05 && nx < 0)) { nx = -nx; ny = -ny; }
+        var gap = r + 6;
+        var anchor = nx > 0.4 ? 'start' : (nx < -0.4 ? 'end' : 'middle');
+        setA(lab.title, 'text-anchor', anchor);
+        setA(lab.title, 'x', (nx * gap / fs).toFixed(1));
+        setA(lab.title, 'y', ((ny * gap + (ny > 0.4 ? 10 : 4)) / fs).toFixed(1));
+        setA(lab.g, 'transform', 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') scale(' + fs.toFixed(3) + ')');
       }
+    });
+    // anti-chevauchement des titres de hubs : 1) masquer les sous-titres en conflit, 2) écartement horizontal symétrique
+    hubBoxes.sort(function (a, b) { return a.x - b.x; });
+    var overlap = function (A, B) { return !(A.bot < B.top || B.bot < A.top) && (A.w + B.w) / 2 + 6 - Math.abs(B.x - A.x) > 0; };
+    for (var i0 = 0; i0 < hubBoxes.length; i0++) {
+      for (var j0 = i0 + 1; j0 < hubBoxes.length; j0++) {
+        if (overlap(hubBoxes[i0], hubBoxes[j0])) { hubBoxes[i0].sub = false; hubBoxes[j0].sub = false; }
+      }
+    }
+    hubBoxes.forEach(function (b) { if (!b.sub) b.w = b.wt; setA(b.lab.sub, 'visibility', b.sub ? null : 'hidden'); });
+    for (var pass = 0; pass < 4; pass++) {
+      for (var i = 0; i < hubBoxes.length; i++) {
+        for (var j = i + 1; j < hubBoxes.length; j++) {
+          var A = hubBoxes[i], B = hubBoxes[j];
+          if (A.bot < B.top || B.bot < A.top) continue;
+          var ov = (A.w + B.w) / 2 + 6 - Math.abs((B.x + B.dx) - (A.x + A.dx));
+          if (ov > 0) { var sgn = (B.x + B.dx) >= (A.x + A.dx) ? 1 : -1; A.dx -= sgn * ov / 2; B.dx += sgn * ov / 2; }
+        }
+      }
+    }
+    hubBoxes.forEach(function (b) {
+      setA(b.lab.g, 'transform', 'translate(' + (b.x + b.dx).toFixed(1) + ' ' + b.y.toFixed(1) + ') scale(' + fs.toFixed(3) + ')');
     });
     if (this.tipUid) this._placeTip();
   };
@@ -1143,10 +1208,10 @@
     for (var i = 0; i < n; i++) {
       var a = hash('pa' + i), b = hash('pb' + i), c = hash('pc' + i), d = hash('pd' + i);
       var arm = i % 3;
-      var rr = 0.18 + 0.82 * Math.sqrt(a);
+      var rr = 0.06 + 0.94 * Math.pow(a, 0.85);
       var gauss = (b + c + d) / 3 - 0.5;
       list.push({
-        r: rr, a: arm * TAU / 3 + rr * 2.6 + gauss * 1.1, w: 0.05 + 0.16 * (1 - rr), size: 0.5 + 1.5 * Math.pow(c, 2),
+        r: rr, a: arm * TAU / 3 + rr * 2.8 + gauss * (0.6 + rr * 0.9), w: 0.05 + 0.18 * (1 - rr), size: 0.55 + 1.7 * Math.pow(c, 2.2),
         al: 0.25 + 0.7 * d, col: cols[Math.floor(b * cols.length) % cols.length], tw: a * TAU, z: (d - 0.5) * 0.18
       });
     }
@@ -1185,12 +1250,12 @@
     var od = this.idx.origin ? this.disp[this.idx.origin.uid] : null;
     var O = od || this.O || { x: 0, y: 0 };
     var c = this.toScreen(O.x, O.y), k = cam.k;
-    var cloudR = this.settings.hubRadius * 3.4 * lerp(1, 1.75, e) * k;
+    var cloudR = this.settings.hubRadius * 4 * lerp(1, 1.7, e) * k;
     if (c.x > -cloudR * 2 && c.x < W + cloudR * 2 && c.y > -cloudR * 2 && c.y < H + cloudR * 2) {
       var dim = od ? od.o : 1;
       var glow = g.createRadialGradient(c.x, c.y, 0, c.x, c.y, cloudR * 1.2);
-      glow.addColorStop(0, 'rgba(233,228,245,' + (0.22 * dim).toFixed(3) + ')');
-      glow.addColorStop(0.35, 'rgba(160,140,255,' + (0.10 * dim).toFixed(3) + ')');
+      glow.addColorStop(0, 'rgba(233,228,245,' + (0.3 * dim).toFixed(3) + ')');
+      glow.addColorStop(0.3, 'rgba(180,160,255,' + (0.14 * dim).toFixed(3) + ')');
       glow.addColorStop(1, 'rgba(120,100,220,0)');
       g.fillStyle = glow; g.beginPath(); g.arc(c.x, c.y, cloudR * 1.2, 0, TAU); g.fill();
       var ps = this.particles, sz = clamp(k * 1.1, 0.6, 1.8), fade = lerp(1, 0.75, e) * dim;
@@ -1246,8 +1311,10 @@
     pad = pad == null ? 40 : pad;
     var pw = this._panelW(), top = 70, bottom = this.mobile && !this.panel.hidden ? this.H * 0.45 : 20;
     var aw = Math.max(80, this.W - pw - pad * 2), ah = Math.max(80, this.H - top - bottom - pad);
-    var bw = Math.max(bb.x1 - bb.x0, 160), bh = Math.max(bb.y1 - bb.y0, 160);
-    var k = clamp(Math.min(aw / bw, ah / bh), this.settings.zoomMin, maxK || this.settings.zoomMax);
+    var bw = Math.max(bb.x1 - bb.x0, 380), bh = Math.max(bb.y1 - bb.y0, 300);
+    var kw = aw / bw, kh = ah / bh;
+    if (this.mobile && kh > kw) kw = Math.min(kh, kw * 1.3); // portrait : léger recadrage latéral
+    var k = clamp(Math.min(kw, kh), this.settings.zoomMin, maxK || this.settings.zoomMax);
     var cx = (bb.x0 + bb.x1) / 2 + (pw / 2) / k, cy = (bb.y0 + bb.y1) / 2 - ((top - bottom) / 2) / k;
     return { x: cx, y: cy, k: k };
   };
@@ -1292,7 +1359,7 @@
     var eT = target === this.central ? 1 : 0;
     var group = this._groupOf(target);
     if (target === this.central && this.idx.origin) group.push(this.idx.origin.uid);
-    this._animateCamera(this._camFor(this._bbox(group, eT), target === this.central ? 1.3 : 1.8, 50));
+    this._animateCamera(this._camFor(this._bbox(group, eT), target === this.central ? 1.15 : 1.45, 50));
   };
   View.prototype.collapse = function () {
     var sl = this.slots, self = this;
@@ -1315,7 +1382,7 @@
     var rec = this.nodeEls[u];
     if (rec) {
       try { rec.g.focus({ preventScroll: true }); } catch (e) { /* noop */ }
-      rec.g.classList.remove('st-flash'); void rec.g.getBBox; rec.g.classList.add('st-flash');
+      rec.g.classList.remove('st-flash'); rec.g.getBoundingClientRect(); rec.g.classList.add('st-flash');
       setTimeout(function () { rec.g.classList.remove('st-flash'); }, 1600);
     }
     this.emit('focus', this.idx.by[u]);
@@ -1412,6 +1479,15 @@
       if (e.ctrlKey) dy *= 3;
       self.zoomBy(Math.exp(-dy * 0.0016), p.x, p.y);
     }, { passive: false });
+    // Échap quand le focus est retombé sur <body> (ex. bouton retiré du DOM)
+    this._on(doc, 'keydown', function (e) {
+      if (e.key !== 'Escape' || (e.target !== doc.body && e.target !== doc.documentElement)) return;
+      var r = self.root.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > (win.innerHeight || 0)) return;
+      if (self.linkMode) self._setLinkMode(0);
+      else if (self.panelUid != null && !self.panel.hidden) self.closePanel(true);
+      else self.collapse();
+    });
     this._on(this.root, 'keydown', function (e) {
       var tag = e.target && e.target.tagName;
       var inField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
@@ -1581,6 +1657,7 @@
   /* ---------- panneau de détail */
   View.prototype._panelShell = function (titleText, kicker) {
     var p = this.panel, self = this;
+    var hadFocus = doc.activeElement && p.contains(doc.activeElement) && doc.activeElement.tagName === 'BUTTON';
     clear(p);
     var head = h('div', 'st-panel-head', p);
     var close = h('button', 'st-close', head); close.type = 'button';
@@ -1588,6 +1665,7 @@
     close.appendChild(uiIcon('close'));
     close.addEventListener('click', function () { self.closePanel(); });
     var body = h('div', 'st-panel-body', p);
+    if (hadFocus) setTimeout(function () { if (!p.contains(doc.activeElement)) try { close.focus({ preventScroll: true }); } catch (e) { /* noop */ } }, 0);
     if (kicker) h('div', 'st-kicker', body, kicker);
     var ttl = h('h2', 'st-panel-title', body, titleText);
     ttl.id = this.id + '-ptitle';
@@ -1601,6 +1679,7 @@
     // force reflow pour l'animation
     if (wasHidden) { void p.offsetWidth; }
     p.classList.add('st-open');
+    this._updateCompact();
     if (focusClose) { var c = p.querySelector('.st-close'); if (c) try { c.focus({ preventScroll: true }); } catch (e) { /* noop */ } }
   };
   View.prototype.closePanel = function (silent) {
@@ -1609,6 +1688,7 @@
     this.panelUid = null;
     p.classList.remove('st-open');
     this.root.classList.remove('st-panel-open');
+    this._updateCompact();
     var self = this;
     clearTimeout(this._panelT);
     this._panelT = setTimeout(function () { if (self.panelUid == null) p.hidden = true; }, this.reduced ? 0 : 320);
@@ -1727,7 +1807,21 @@
       btn.addEventListener('click', function () { btn.disabled = true; self.complete(u).then(function () { btn.disabled = false; }); });
     }
     this._showPanel(!noFocus && !refresh);
+    if (!refresh) this._ensureVisible(u);
     if (!refresh && prev !== u) this.emit('open', n);
+  };
+
+  /** Déplace la caméra si le nœud est masqué par le panneau (latéral ou bottom-sheet). */
+  View.prototype._ensureVisible = function (u) {
+    var d = this.disp[u]; if (!d) return;
+    var p = this.toScreen(d.x, d.y), pw = this._panelW(), k = this.cam.k;
+    var maxX = this.W - pw - 40, maxY = this.mobile ? this.H * 0.36 : this.H - 40;
+    if (p.x >= 40 && p.x <= maxX && p.y >= 70 && p.y <= maxY) return;
+    var tx = this.mobile ? this.W / 2 : (this.W - pw) / 2, ty = this.mobile ? this.H * 0.2 : this.H / 2;
+    this._animateCamera({ x: d.x - (tx - this.W / 2) / k, y: d.y - (ty - this.H / 2) / k, k: k });
+  };
+  View.prototype._updateCompact = function () {
+    this.root.classList.toggle('st-compact-tools', (this.W - this._panelW()) < 1180);
   };
 
   /* ---------- progression */
@@ -2068,11 +2162,8 @@
     var u = this.selected, n = u && this.idx.by[u];
     if (!n) {
       this.panelUid = null;
-      var body0 = this._panelShell(t.ed_properties);
-      h('p', 'st-muted', body0, t.ed_noSelection);
-      this.panelUid = '';
-      this._showPanel(false);
-      if (this.mobile) { this.panel.classList.remove('st-open'); this.panel.hidden = true; }
+      if (this.mobile) { this.closePanel(true); return; }
+      this._renderTreeEditor();
       return;
     }
     this.panelUid = u;
@@ -2220,6 +2311,52 @@
     jsonField(t.ed_reward, 'reward', 2);
     jsonField(t.ed_meta, 'meta', 2);
     jsonField(t.ed_theme, 'theme', 2);
+    this._showPanel(false);
+  };
+
+  /** Propriétés de l'arbre (aucun nœud sélectionné) : nom, description, layout, thème, réglages. */
+  View.prototype._renderTreeEditor = function () {
+    var t = this.t, self = this, tr = this.data.tree;
+    var body = this._panelShell(tr.name || t.ed_properties, t.ed_properties + ' · ' + (t.ed_treeKicker || 'Arbre'));
+    this.panelUid = '';
+    h('p', 'st-muted', body, t.ed_noSelection);
+    var form = h('form', 'st-form', body);
+    form.addEventListener('submit', function (e) { e.preventDefault(); });
+    var pending = null;
+    function field(label, input, full) {
+      var f = h('div', 'st-field' + (full ? ' st-field-full' : ''), form);
+      var id = self.id + '-t' + (++self._fid || (self._fid = 1));
+      var lb = h('label', null, f, label); lb.htmlFor = id; input.id = id; f.appendChild(input);
+      var err = h('div', 'st-err', f); err.setAttribute('aria-live', 'polite');
+      input.addEventListener('focus', function () { pending = self._snapshot(); });
+      return err;
+    }
+    function commit() { self._pushUndo(pending || undefined); pending = null; }
+    var iN = h('input'); iN.type = 'text'; iN.value = tr.name || ''; iN.maxLength = 190;
+    field(t.ed_name, iN, true);
+    iN.addEventListener('change', function () { commit(); tr.name = iN.value; self._renderHeader(); self._renderToolbar(); self.emit('change', self.api); });
+    var iD = h('textarea'); iD.rows = 2; iD.value = tr.description || '';
+    field(t.ed_description, iD, true);
+    iD.addEventListener('change', function () { commit(); tr.description = iD.value; self._renderHeader(); self._renderToolbar(); self.emit('change', self.api); });
+    var sL = h('select');
+    ['free', 'heart', 'radial', 'ring'].forEach(function (x) { var o = h('option', null, sL, x); o.value = x; });
+    sL.value = ['free', 'heart', 'radial', 'ring'].indexOf(tr.layout) >= 0 ? tr.layout : 'free';
+    field(t.ed_layout || 'Layout', sL);
+    sL.addEventListener('change', function () { commit(); tr.layout = sL.value; self._changed(true); self._fitAll(true); });
+    [['theme', t.ed_theme], ['settings', t.ed_settings || 'Réglages (JSON)']].forEach(function (x) {
+      var ta = h('textarea', 'st-code'); ta.rows = 3; ta.spellcheck = false; ta.value = JSON.stringify(tr[x[0]] || {}, null, 1);
+      var err = field(x[1], ta, true);
+      ta.addEventListener('input', function () {
+        try { if (!isObj(JSON.parse(ta.value || '{}'))) throw new Error('objet {…} attendu'); err.textContent = ''; ta.removeAttribute('aria-invalid'); }
+        catch (e) { err.textContent = fmt(t.ed_invalidJson, { msg: e.message }); ta.setAttribute('aria-invalid', 'true'); }
+      });
+      ta.addEventListener('change', function () {
+        var v; try { v = JSON.parse(ta.value || '{}'); if (!isObj(v)) throw new Error('objet {…} attendu'); } catch (e) { return; }
+        commit(); tr[x[0]] = v;
+        self._normSettings(); self.particles = null;
+        self._applyTheme(); self._changed(true);
+      });
+    });
     this._showPanel(false);
   };
 
